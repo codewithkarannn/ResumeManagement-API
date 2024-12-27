@@ -1,11 +1,12 @@
-﻿using ResumeManagement_API.Models;
+﻿using ResumeManagement_API.DTOs;
+using ResumeManagement_API.Models;
 
 namespace ResumeManagement_API.Repositories
 {
     public interface ICandidateRepository
     {
         // Method to add a new candidate
-        Task AddCandidateAsync(Candidate model);
+        Task<CandidateDto> AddCandidateAsync(Candidate model);
 
         Task AddCandidateCVFIleAsync(CandidateCvfile model);
 
@@ -28,8 +29,12 @@ namespace ResumeManagement_API.Repositories
 
         Task<Candidate> GetCandidateByCandidateID(Guid candidateID);
 
+        Task<CandidateDto>? GetCandidateDtoByCandidateID(Guid candidateID);
+
         Task<CandidateCvfile> GetCandidateCVByCandidateID(Guid candidateID);
         Task<Candidate> GetCandidateByCandidateEmail(string email);
+        Task<List<CandidateDto>>? GetAllCandidates();
+        
 
     }
 }

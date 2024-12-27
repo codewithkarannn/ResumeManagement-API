@@ -6,13 +6,13 @@ namespace ResumeManagement_API.DTOs
     {
         public Guid? CandidateId { get; set; }
 
-        [Required(ErrorMessage = "Name is required.")]
-        [StringLength(250, ErrorMessage = "Name must be less than 250 characters.")]
-        public string Name { get; set; } = null!;
+        //[Required(ErrorMessage = "Name is required.")]
+        //[StringLength(250, ErrorMessage = "Name must be less than 250 characters.")]
+        public string? Name { get; set; } 
 
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; } = null!;
+        //[Required(ErrorMessage = "Email is required.")]
+        //[EmailAddress(ErrorMessage = "Invalid email address.")]
+        public string? Email { get; set; } 
 
         [Phone(ErrorMessage = "Invalid mobile number.")]
         public string? Mobile { get; set; }
@@ -29,14 +29,13 @@ namespace ResumeManagement_API.DTOs
         [StringLength(1000, ErrorMessage = "Feedback must be less than 1000 characters.")]
         public string? InterviewFeedback { get; set; }
 
-        [Required(ErrorMessage = "Status ID is required.")]
+        //[Required(ErrorMessage = "Status ID is required.")]
         public int? StatusId { get; set; }
 
-        [Required(ErrorMessage = "City ID is required.")]
+        //[Required(ErrorMessage = "City ID is required.")]
         public int? CityId { get; set; }
 
 
-        public IFormFile? CvFile { get; set; } // New property to accept file
         public DateTime? CreatedAt { get; set; }
     }
 }

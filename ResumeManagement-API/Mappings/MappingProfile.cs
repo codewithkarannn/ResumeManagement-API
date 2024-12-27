@@ -10,6 +10,7 @@ namespace ResumeManagement_API.Mappings
 
             CreateMap<AddEditCandidateDto, Candidate>().ReverseMap();
             CreateMap<Candidate, Candidate>();
+            CreateMap<Candidate, CandidateDto>().ReverseMap();
 
             CreateMap<CountryMaster, CountryDto>().ReverseMap();
             CreateMap<CountryDto, CountryDto>();

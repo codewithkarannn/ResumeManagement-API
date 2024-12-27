@@ -8,7 +8,7 @@ namespace ResumeManagement_API.Services
     {
 
         // Add a new candidate
-        Task AddCandidateAsync(AddEditCandidateDto model);
+        Task <CandidateDto> AddCandidateAsync(AddEditCandidateDto model);
 
         // Edit an existing candidate
         Task EditCandidateAsync(AddEditCandidateDto model);
@@ -24,8 +24,12 @@ namespace ResumeManagement_API.Services
 
         // Get all statuses
         Task<List<StatusDto>> GetAllStatus();
-        Task<Candidate> GetCandidateByCandidateID(Guid candidateID);
+        Task<CandidateDto> GetCandidateByCandidateID(Guid candidateID);
 
         Task<CandidateCvfile> GetCandidateCVByCandidateID(Guid candidateID);
+
+        Task<List<CandidateDto>> GetAllCandidates();
+
+        Task UploadCv(Guid candidateID, IFormFile CvFile);
     }
 }

@@ -19,5 +19,7 @@ public partial class CandidateCvfile
 
     public DateTime? CreatedAt { get; set; }
 
+    public sbyte IsActive { get; set; }
+
     public virtual Candidate? Candidate { get; set; }
 }

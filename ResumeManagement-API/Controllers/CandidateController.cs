@@ -8,7 +8,7 @@ using static ResumeManagement_API.Services.ICandidateServices;
 
 namespace ResumeManagement_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class CandidateController : ControllerBase
     {
@@ -19,14 +19,15 @@ namespace ResumeManagement_API.Controllers
             _candidateService = candidateService;
         }
 
-        [HttpPost("addcandidate")]
-        public async Task<IActionResult> AddCandidate([FromBody] AddEditCandidateDto model)
+        [HttpPost]
+        public async Task<IActionResult> AddCandidate(AddEditCandidateDto model)
         {
             try
             {
-                await _candidateService.AddCandidateAsync(model);
+                
+                var result = await _candidateService.AddCandidateAsync(model);
               
-                var response = new ResponseModel<object>(null, "Candidate added successfully.", 201);
+                var response = new ResponseModel<object>(result, "Candidate added successfully.", 201);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -37,7 +38,7 @@ namespace ResumeManagement_API.Controllers
             }
         }
 
-        [HttpPut("editcandidate")]
+        [HttpPut]
         public async Task<IActionResult> EditCandidate([FromBody]  AddEditCandidateDto model)
         {
             try
@@ -54,8 +55,27 @@ namespace ResumeManagement_API.Controllers
                 return StatusCode(response.StatusCode, response);
             }
         }
+        
+        [HttpPut]
+        public async Task<IActionResult> UploadCV( [FromForm]Guid candidateID , IFormFile cvFile)
+        {
+            try
+            {
+                await _candidateService.UploadCv(candidateID ,  cvFile);
 
-        [HttpDelete("deactivatecandidate")]
+                var response = new ResponseModel<object>(null, "Candidate updated successfully.", 201);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Return error response with 400 Bad Request status code
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
+
+       
+        [HttpDelete]
         public async Task<IActionResult> DeActivateCandidateAsync([FromBody] Candidate model)
         {
             try
@@ -73,7 +93,7 @@ namespace ResumeManagement_API.Controllers
             }
         }
 
-        [HttpGet("countries")]
+        [HttpGet]
         public async Task<IActionResult> GetAllCountries()
         {
             try
@@ -90,7 +110,23 @@ namespace ResumeManagement_API.Controllers
             }
         }
 
-        [HttpGet("cities/{countryID}")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllCandidates()
+        {
+            try
+            {
+                var candidates = await _candidateService.GetAllCandidates();
+                var response = new ResponseModel<object>(candidates, "Candidates fetched", 201);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Return error response with 400 Bad Request status code
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
+        [HttpGet]
         public async Task<IActionResult> GetAllCities(int countryID)
         {
             try
@@ -107,7 +143,7 @@ namespace ResumeManagement_API.Controllers
             }
         }
 
-        [HttpGet("statuses")]
+        [HttpGet]
         public async Task<IActionResult> GetAllStatuses()
         {
             try
@@ -124,7 +160,7 @@ namespace ResumeManagement_API.Controllers
             }
         }
         
-        [HttpGet("getcv")]
+        [HttpGet]
         public async Task<IActionResult> GetCv(Guid candidateId)
         {
             var candidate = await _candidateService.GetCandidateCVByCandidateID(candidateId);
@@ -135,10 +171,10 @@ namespace ResumeManagement_API.Controllers
             }
 
             var fileBytes = candidate.FileData; // Binary data from the database
-            return File(fileBytes, "application/pdf", "candidate_cv.pdf"); // Assuming PDF file
+            return File(fileBytes, "application/pdf", candidate.FileName); // Assuming PDF file
         }
 
-        [HttpGet("getcandidatebycandidateid")]
+        [HttpGet]
         public async Task<IActionResult> GetCandidateByCandidateID(Guid candidateId)
         {
             

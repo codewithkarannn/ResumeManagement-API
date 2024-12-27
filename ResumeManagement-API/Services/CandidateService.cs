@@ -17,11 +17,11 @@ namespace ResumeManagement_API.Services
             _mapper = mapper;
         }
 
-        public async Task AddCandidateAsync(AddEditCandidateDto model)
+        public async Task <CandidateDto> AddCandidateAsync(AddEditCandidateDto model)
         {
             try
             {
-                var existingModel = _candidateRepository.GetCandidateByCandidateEmail(model.Email);
+                var existingModel = await _candidateRepository.GetCandidateByCandidateEmail(model.Email);
                 if(existingModel != null) 
                 {
 
@@ -35,34 +35,8 @@ namespace ResumeManagement_API.Services
                     newModel.IsActive = 1;
                     newModel.CreatedAt = System.DateTime.UtcNow;
 
-                    await _candidateRepository.AddCandidateAsync(newModel);
+                    return  await _candidateRepository.AddCandidateAsync(newModel);
 
-                    if (model.CvFile != null)
-                    {
-                        // Validate the file type and size
-                        var fileExtension = Path.GetExtension(model.CvFile.FileName).ToLower();
-                        if (fileExtension != ".pdf")
-                        {
-                            throw new ArgumentException("The CV must be a PDF file.");
-                        }
-
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await model.CvFile.CopyToAsync(memoryStream);
-
-                            var newCv = new CandidateCvfile
-                            {
-                                FileId = Guid.NewGuid(),
-                                FileData = memoryStream.ToArray(),
-                                FileName = model.CvFile.FileName,
-                                FileType = fileExtension,
-                                FileSize = model.CvFile.Length,
-                                CandidateId =  model.CandidateId,
-                            };
-                            await _candidateRepository.AddCandidateCVFIleAsync(newCv);
-                        }
-                        
-                    }
                 }
                
             }
@@ -80,33 +54,7 @@ namespace ResumeManagement_API.Services
                 if(existingModel != null)
                 {
                     var editModel = _mapper.Map<Candidate>(model);
-                    if (model.CvFile != null)
-                    {
-
-                        // Validate the file type and size
-                        var fileExtension = Path.GetExtension(model.CvFile.FileName).ToLower();
-                        if (fileExtension != ".pdf")
-                        {
-                            throw new ArgumentException("The CV must be a PDF file.");
-                        }
-
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await model.CvFile.CopyToAsync(memoryStream);
-
-                            var newCv = new CandidateCvfile
-                            {
-                                FileId = Guid.NewGuid(),
-                                FileData = memoryStream.ToArray(),
-                                FileName = model.CvFile.FileName,
-                                FileType = fileExtension,
-                                FileSize = model.CvFile.Length,
-                                CandidateId = model.CandidateId,
-                            };
-                            await _candidateRepository.AddCandidateCVFIleAsync(newCv);
-                        }
-
-                    }
+                  
                     await _candidateRepository.EditCandidateAsync(editModel);
                 }
                 else
@@ -171,11 +119,11 @@ namespace ResumeManagement_API.Services
             }
         }
 
-        public async Task<Candidate> GetCandidateByCandidateID(Guid candidateID)
+        public async Task<CandidateDto>? GetCandidateByCandidateID(Guid candidateID)
         {
             try
             {
-                return await _candidateRepository.GetCandidateByCandidateID(candidateID);
+                return await _candidateRepository.GetCandidateDtoByCandidateID(candidateID);
             }
             catch (Exception ex)
             {
@@ -196,16 +144,70 @@ namespace ResumeManagement_API.Services
         }
 
 
-        public async Task<Candidate> GetAllCandidates(Guid candidateID)
+        public async Task<List<CandidateDto>> GetAllCandidates()
         {
             try
             {
-                return await _candidateRepository.GetCandidateByCandidateID(candidateID);
+                return await _candidateRepository.GetAllCandidates();
             }
             catch (Exception ex)
             {
                 throw new Exception("Error occurred while fetching candidate. Please try again.", ex);
             }
         }
+
+
+        public async Task UploadCv( Guid  candidateID , IFormFile CvFile)
+        {
+            try
+            {
+                var existingModel = await _candidateRepository.GetCandidateByCandidateID(candidateID );
+                if (existingModel != null)
+                {
+
+                    if (CvFile != null)
+                    {
+                        // Validate the file type and size
+                        var fileExtension = Path.GetExtension(CvFile.FileName).ToLower();
+                        if (fileExtension != ".pdf")
+                        {
+                            throw new ArgumentException("The CV must be a PDF file.");
+                        }
+
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await CvFile.CopyToAsync(memoryStream);
+
+                            var newCv = new CandidateCvfile
+                            {
+                                FileId = Guid.NewGuid(),
+                                FileData = memoryStream.ToArray(),
+                                FileName = CvFile.FileName,
+                                FileType = fileExtension,
+                                FileSize = CvFile.Length,
+                                CandidateId = candidateID,
+                            };
+                            await _candidateRepository.AddCandidateCVFIleAsync(newCv);
+                        }
+
+                    }
+                    
+                }
+                else
+
+                {
+                    throw new KeyNotFoundException($" User  not found.");
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error occurred while editing the candidate. Please try again.", ex);
+            }
+        }
+
+
+    
     }
 }

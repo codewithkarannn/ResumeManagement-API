@@ -7,8 +7,17 @@ using ResumeManagement_API.Services;
 using AutoMapper;
 
 using System.Text;
+using Serilog;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 
 builder.Services.AddAutoMapper(typeof(Program));
@@ -71,6 +80,63 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Middleware for logging requests
+app.Use(async (context, next) =>
+{
+    var stopWatch = Stopwatch.StartNew();
+
+    // Log request start
+    Log.Information("Handling request: {Method} {Url}", context.Request.Method, context.Request.Path);
+
+    try
+    {
+        await next(); // Call the next middleware
+    }
+    catch (Exception ex)
+    {
+        // Log exception details
+        Log.Error(ex, "An error occurred while processing the request.");
+        throw; // Re-throw the exception after logging it
+    }
+    finally
+    {
+        stopWatch.Stop();
+
+        // Log request end with duration and status code
+        Log.Information("Finished handling request in {ElapsedMilliseconds} ms with status code {StatusCode}",
+            stopWatch.ElapsedMilliseconds, context.Response.StatusCode);
+    }
+});
+
+// Global error handling middleware
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+
+        Log.Error(exception, "An unhandled exception occurred: {Message}", exception?.Message);
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsync("An unexpected error occurred.");
+    });
+});
+
+
+
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("Starting up the application...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application start-up failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

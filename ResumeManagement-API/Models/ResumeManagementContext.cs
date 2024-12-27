@@ -84,6 +84,7 @@ public partial class ResumeManagementContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.FileName).HasMaxLength(250);
             entity.Property(e => e.FileType).HasMaxLength(50);
+            entity.Property(e => e.IsActive).HasDefaultValueSql("'1'");
 
             entity.HasOne(d => d.Candidate).WithMany(p => p.CandidateCvfiles)
                 .HasForeignKey(d => d.CandidateId)
