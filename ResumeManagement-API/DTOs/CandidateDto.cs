@@ -29,6 +29,9 @@
         public sbyte? IsActive { get; set; }
 
         public string? CvFileName { get; set; }
+
+        public int? CountryId { get; set; }
+        public string? CountryName { get; set; }
     }
 
 }

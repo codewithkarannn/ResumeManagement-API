@@ -50,7 +50,7 @@ namespace ResumeManagement_API.Services
         {
             try
             {
-                var existingModel = _candidateRepository.GetCandidateByCandidateID(model.CandidateId ?? Guid.Empty);
+                var existingModel = await _candidateRepository.GetCandidateByCandidateID(model.CandidateId ?? Guid.Empty);
                 if(existingModel != null)
                 {
                     var editModel = _mapper.Map<Candidate>(model);
@@ -71,11 +71,11 @@ namespace ResumeManagement_API.Services
             }
         }
 
-        public async Task DeActivateCandidateAsync(Candidate model)
+        public async Task DeActivateCandidateAsync(Guid candidateID)
         {
             try
             {
-                await _candidateRepository.DeActivateCandidateAsync(model);
+                await _candidateRepository.DeActivateCandidateAsync(candidateID);
             }
             catch (Exception ex)
             {

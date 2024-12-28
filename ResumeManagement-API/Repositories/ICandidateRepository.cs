@@ -16,7 +16,7 @@ namespace ResumeManagement_API.Repositories
         Task EditCandidateAsync(Candidate model);
 
         // Method to deactivate a candidate
-        Task DeActivateCandidateAsync(Candidate model);
+        Task DeActivateCandidateAsync(Guid candidateID);
 
         // Method to get all countries
         Task<List<CountryMaster>> GetAllCountries();

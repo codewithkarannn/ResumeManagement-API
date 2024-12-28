@@ -90,13 +90,20 @@ namespace ResumeManagement_API.Repositories
             }
         }
 
-        public async Task DeActivateCandidateAsync(Candidate model)
+        public async Task DeActivateCandidateAsync(Guid candidateID)
         {
             try
             {
+                var existingCandidate = await db.Candidates.AsNoTracking().FirstOrDefaultAsync(i => i.CandidateId == candidateID);
+               
+                if(existingCandidate != null)
+                {
+                    existingCandidate.IsActive= 0;
+                    db.Candidates.Update(existingCandidate);
+                    await db.SaveChangesAsync();
+                }
                 
-                db.Candidates.Update(model);
-                await db.SaveChangesAsync();
+                
             }
             catch (Exception ex)
             {
@@ -127,7 +134,7 @@ namespace ResumeManagement_API.Repositories
                 throw new Exception("\"There was an error . Please try again.\"", ex);
             }
         }
-
+        
         public async Task<List<StatusMaster>> GetAllStatus()
         {
             try
@@ -173,7 +180,7 @@ namespace ResumeManagement_API.Repositories
         {
             try
             {
-                var candidate = await db.Candidates.Include(i => i.Status).Include(i => i.City).Include(i => i.CandidateCvfiles).Select(i => new CandidateDto
+                var candidate = await db.Candidates.Include(i => i.Status).Include(i => i.City).ThenInclude(i=>i.Country).Include(i => i.CandidateCvfiles).AsNoTracking().Select(i => new CandidateDto
                 {
                     CandidateId = i.CandidateId,
                     Name = i.Name,
@@ -189,7 +196,8 @@ namespace ResumeManagement_API.Repositories
                     ExpectedCtc = i.ExpectedCtc ?? null,
                     IsActive = i.IsActive,
                     CvFileName =  i.CandidateCvfiles.Where(i=>i.CandidateId == candidateID ).Select(i=>i.FileName).FirstOrDefault() ?? null,
-
+                    CountryId = i.City.CountryId,
+                    CountryName = i.City.Country.CountryName,
                 }).Where(i=>i.CandidateId ==  candidateID).FirstOrDefaultAsync();
                 return candidate;
             }
@@ -218,7 +226,7 @@ namespace ResumeManagement_API.Repositories
             try
             {
 
-                var candidates = await db.Candidates.Include(i => i.Status).Include(i => i.City).Include(i => i.CandidateCvfiles).Select(i => new CandidateDto
+                var candidates = await db.Candidates.Include(i => i.Status).Include(i => i.City).ThenInclude(i=>i.Country).Include(i => i.CandidateCvfiles).Select(i => new CandidateDto
                 {
                     CandidateId = i.CandidateId,
                     Name = i.Name,
@@ -233,9 +241,11 @@ namespace ResumeManagement_API.Repositories
                     Ctc = i.Ctc ?? null,
                     ExpectedCtc = i.ExpectedCtc ?? null,
                     IsActive = i.IsActive,
-                    
+                    CountryId = i.City.CountryId ,
+                    CountryName = i.City.Country.CountryName ,
+                    CreatedAt =  i.CreatedAt
 
-                }).ToListAsync();
+                }).Where(i=>i.IsActive ==1).OrderByDescending(i=>i.CreatedAt).ToListAsync();
                 return candidates;
             }
             catch (Exception ex)

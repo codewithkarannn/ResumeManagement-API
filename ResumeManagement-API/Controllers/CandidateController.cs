@@ -39,7 +39,7 @@ namespace ResumeManagement_API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> EditCandidate([FromBody]  AddEditCandidateDto model)
+        public async Task<IActionResult> EditCandidate(AddEditCandidateDto model)
         {
             try
             {
@@ -76,13 +76,13 @@ namespace ResumeManagement_API.Controllers
 
        
         [HttpDelete]
-        public async Task<IActionResult> DeActivateCandidateAsync([FromBody] Candidate model)
+        public async Task<IActionResult> DeActivateCandidate(Guid candidateID)
         {
             try
             {
-                await _candidateService.DeActivateCandidateAsync(model);
+                await _candidateService.DeActivateCandidateAsync(candidateID);
 
-                var response = new ResponseModel<object>(null, "Candidate updated successfully.", 201);
+                var response = new ResponseModel<object>(null, "Candidate De-Activated successfully.", 201);
                 return Ok(response);
             }
             catch (Exception ex)
