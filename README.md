@@ -19,7 +19,7 @@ Navigate to Project Directory
 
 Change to your project directory using:
 
-`   bashcd MySchemaCreationApp   `
+`   bashcd ResumeManagementAPI   `
 
 _(Replace MySchemaCreationApp with the actual name of your project directory.)_
 
